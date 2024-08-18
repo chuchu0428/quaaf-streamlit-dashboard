@@ -26,6 +26,16 @@ def fetch_stock_data(ticker):
     }
     return hist, extra_metrics
 
+def metrics_table(ticker):
+    stock = yf.Ticker(ticker)
+
+# Fetch financials
+    financials = stock.financials
+    balance_sheet = stock.balance_sheet
+    output1 = balance_sheet.T[['Total Assets','Total Debt']]
+    output2 = financials.T[['Total Revenue','EBITDA','Basic EPS','Operating Income','Operating Expense']]
+    output = output1.join(output2)
+    return output.T
 
 # Streamlit UI for Industry Indices
 def display_index_dashboard():
@@ -43,8 +53,11 @@ def display_stock_dashboard():
     stocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']  # Example stocks
     selected_stock = st.sidebar.selectbox('Select a Stock', stocks)
     stock_data, metrics = fetch_stock_data(selected_stock)
+    metr = metrics_table(selected_stock)
     st.write(f"Data for {selected_stock}")
     st.dataframe(stock_data[['Open', 'High', 'Low', 'Close', 'Volume']])
+    st.title(f"Financials for {selected_stock}")
+    st.dataframe(metr)
     st.metric(label="PE Ratio", value=metrics['PE Ratio'])
     st.metric(label="Dividend Yield", value=metrics['Dividend Yield'])
     st.metric(label="Beta", value=metrics['Beta'])

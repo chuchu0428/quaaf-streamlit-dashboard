@@ -109,7 +109,24 @@ def fetch_financial_metrics(stock):
         'Debt-to-Equity Ratio': info.get('debtToEquity', 'N/A')
     }
 
+def fetch_strategy_data(ticker):
+    """ Fetch historical data for trading strategy simulation. """
+    data = yf.Ticker(ticker)
+    hist = data.history(period="1y")
+    return hist['Close']
+
+def calculate_momentum(data):
+    """ Calculate simple momentum as the percentage change over the specified period """
+    return data.pct_change(periods=90)  # Using 90 days as momentum period
+
+def display_strategy(strategy, data):
+    """ Display insights based on selected trading strategy """
+    if strategy == "Momentum":
+        momentum = calculate_momentum(data)
+        st.write("Momentum calculated over 90 days:")
+        st.line_chart(momentum)
 # Streamlit UI for Stocks with Sector Selection
+
 def display_stock_dashboard():
     st.title('Stocks Dashboard')
     sectors = list(sector_to_stocks.keys())
@@ -122,6 +139,13 @@ def display_stock_dashboard():
     for label, value in metrics.items():
         st.metric(label=label, value=value)
     st.line_chart(stock_data[['Close', 'SMA_20', 'EMA_20']])
+
+    # Additional section for selecting and displaying trading strategies
+    st.sidebar.subheader("Trading Strategies")
+    selected_strategy = st.sidebar.selectbox('Select a Strategy', ['Momentum'])  # Add more strategies here
+    strategy_data = fetch_strategy_data(selected_stock)  # Fetch data suitable for strategy analysis
+    display_strategy(selected_strategy, strategy_data)
+    
 def display_index_dashboard():
     st.title('Industry Indices Dashboard')
     indices = ['^DJI', '^GSPC', '^IXIC', '^RUT']  # Dow Jones, S&P 500, NASDAQ, Russell 2000

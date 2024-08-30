@@ -2,7 +2,22 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 
-# Function to fetch data for a specific ticker with one year of data
+# Sector to stocks mapping for a subset of S&P 500
+sector_to_stocks = {
+    'Communication Services': ['GOOGL', 'FB', 'VZ', 'T', 'NFLX'],
+    'Consumer Discretionary': ['AMZN', 'NKE', 'MCD', 'TSLA', 'SBUX'],
+    'Consumer Staples': ['PG', 'KO', 'PEP', 'WMT', 'COST'],
+    'Energy': ['XOM', 'CVX', 'SLB', 'COP', 'EOG'],
+    'Financials': ['JPM', 'BAC', 'WFC', 'C', 'GS'],
+    'Health Care': ['JNJ', 'PFE', 'UNH', 'MRK', 'ABBV'],
+    'Industrials': ['GE', 'MMM', 'BA', 'HON', 'UNP'],
+    'Information Technology': ['AAPL', 'MSFT', 'INTC', 'NVDA', 'AMD'],
+    'Materials': ['LIN', 'APD', 'ECL', 'NEM', 'PPG'],
+    'Real Estate': ['AMT', 'SPG', 'CCI', 'WELL', 'DLR'],
+    'Utilities': ['NEE', 'DUK', 'SO', 'AEP', 'EXC']
+}
+
+# Function to fetch data for a specific stock with one year of data
 def fetch_data(ticker, with_extra_metrics=False):
     data = yf.Ticker(ticker)
     hist = data.history(period="1y")  # Fetch data for the past year
@@ -48,7 +63,19 @@ def fetch_financial_metrics(stock):
         'Debt-to-Equity Ratio': info.get('debtToEquity', 'N/A')
     }
 
-# Streamlit UI for Industry Indices
+# Streamlit UI for Stocks with Sector Selection
+def display_stock_dashboard():
+    st.title('Stocks Dashboard')
+    sectors = list(sector_to_stocks.keys())
+    selected_sector = st.sidebar.selectbox('Select a Sector', sectors)
+    stocks = sector_to_stocks[selected_sector]
+    selected_stock = st.sidebar.selectbox('Select a Stock from ' + selected_sector, stocks)
+    stock_data, metrics = fetch_data(selected_stock, with_extra_metrics=True)
+    st.write(f"Data for {selected_stock}")
+    st.dataframe(stock_data[['Open', 'High', 'Low', 'Close', 'Volume', 'SMA_20', 'EMA_20', 'Volatility', 'RSI', 'Upper Bollinger', 'Lower Bollinger']])
+    for label, value in metrics.items():
+        st.metric(label=label, value=value)
+    st.line_chart(stock_data[['Close', 'SMA_20', 'EMA_20']])
 def display_index_dashboard():
     st.title('Industry Indices Dashboard')
     indices = ['^DJI', '^GSPC', '^IXIC', '^RUT']  # Dow Jones, S&P 500, NASDAQ, Russell 2000
@@ -57,18 +84,6 @@ def display_index_dashboard():
     st.write(f"Data for {selected_index}")
     st.dataframe(index_data[['Open', 'High', 'Low', 'Close', 'Volume', 'SMA_20', 'EMA_20', 'Volatility', 'RSI', 'Upper Bollinger', 'Lower Bollinger']])
     st.line_chart(index_data[['Close', 'SMA_20', 'EMA_20']])
-
-# Streamlit UI for Stocks
-def display_stock_dashboard():
-    st.title('Stocks Dashboard')
-    stocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']  # Example stocks
-    selected_stock = st.sidebar.selectbox('Select a Stock', stocks)
-    stock_data, metrics = fetch_data(selected_stock, with_extra_metrics=True)
-    st.write(f"Data for {selected_stock}")
-    st.dataframe(stock_data[['Open', 'High', 'Low', 'Close', 'Volume']])
-    for label, value in metrics.items():
-        st.metric(label=label, value=value)
-    st.line_chart(stock_data['Close'])
 
 # Main function to control the dashboard
 def main():

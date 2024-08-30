@@ -4,17 +4,63 @@ import pandas as pd
 
 # Sector to stocks mapping for a subset of S&P 500
 sector_to_stocks = {
-    'Communication Services': ['GOOGL', 'FB', 'VZ', 'T', 'NFLX'],
-    'Consumer Discretionary': ['AMZN', 'NKE', 'MCD', 'TSLA', 'SBUX'],
-    'Consumer Staples': ['PG', 'KO', 'PEP', 'WMT', 'COST'],
-    'Energy': ['XOM', 'CVX', 'SLB', 'COP', 'EOG'],
-    'Financials': ['JPM', 'BAC', 'WFC', 'C', 'GS'],
-    'Health Care': ['JNJ', 'PFE', 'UNH', 'MRK', 'ABBV'],
-    'Industrials': ['GE', 'MMM', 'BA', 'HON', 'UNP'],
-    'Information Technology': ['AAPL', 'MSFT', 'INTC', 'NVDA', 'AMD'],
-    'Materials': ['LIN', 'APD', 'ECL', 'NEM', 'PPG'],
-    'Real Estate': ['AMT', 'SPG', 'CCI', 'WELL', 'DLR'],
-    'Utilities': ['NEE', 'DUK', 'SO', 'AEP', 'EXC']
+    'Communication Services': [
+        'ATVI', 'GOOGL', 'GOOG', 'T', 'CTL', 'CHTR', 'CMCSA', 'DISCA', 'DISCK', 'DISH', 'EA', 'FB', 'FOXA', 'FOX', 'IPG', 
+        'LYV', 'NFLX', 'NWSA', 'NWS', 'OMC', 'TMUS', 'TTWO', 'TWTR', 'VZ', 'VIAC', 'DIS'],
+    'Consumer Discretionary': [
+    'AAP', 'AMZN', 'APTV', 'AZO', 'BBY', 'BKNG', 'BWA', 'CCL', 'CMG', 'DHI', 'DRI', 'EBAY', 'ETSY', 'EXPE', 'F', 
+    'FORD', 'GM', 'GRMN', 'HAS', 'HD', 'HLT', 'IP', 'KMX', 'LEG', 'LEN', 'LVS', 'M', 'MAR', 'MCD', 'MGM', 'MHK', 
+    'NCLH', 'NKE', 'NVR', 'ORLY', 'PHM', 'PVH', 'RCL', 'RL', 'ROST', 'SBUX', 'SNA', 'TGT', 'TIF', 'TJX', 'TPR', 
+    'UAA', 'UA', 'ULTA', 'VFC', 'WHR', 'WYNN', 'YUM'
+],
+    'Consumer Staples': [
+    'ADM', 'BF.B', 'CAG', 'CHD', 'CL', 'CLX', 'COST', 'CPB', 'CAG', 'CVS', 'DPS', 'EL', 'GIS', 'HSY', 'HRL', 
+    'K', 'KHC', 'KMB', 'KO', 'KR', 'LW', 'MDLZ', 'MKC', 'MNST', 'MO', 'PEP', 'PG', 'PM', 'SYY', 'SJM', 'TAP', 
+    'TSN', 'WBA', 'WMT', 'WAG'
+],
+    'Energy': [
+    'APA', 'BKR', 'COG', 'COP', 'CVX', 'CXO', 'DVN', 'EOG', 'FANG', 'FTI', 'HAL', 'HES', 'HFC', 'KMI', 'MPC', 
+    'MRO', 'NBL', 'NOV', 'OKE', 'OXY', 'PSX', 'PXD', 'SLB', 'VLO', 'WMB', 'XEC', 'XOM'
+],
+    'Financials': [
+    'AFL', 'AIG', 'AIZ', 'AJG', 'ALL', 'AMG', 'AON', 'AXP', 'BAC', 'BEN', 'BK', 'BLK', 'BRO', 'C', 'CB', 
+    'CBOE', 'CINF', 'CIT', 'CFG', 'CME', 'CMA', 'COF', 'DFS', 'ETFC', 'FRC', 'FITB', 'GL', 'GS', 'HIG', 
+    'HBAN', 'ICE', 'IVZ', 'JPM', 'KEY', 'L', 'LNC', 'MCO', 'MET', 'MKTX', 'MMC', 'MS', 'MTB', 'NDAQ', 
+    'NTRS', 'PFG', 'PGR', 'PNC', 'PRU', 'RE', 'RF', 'RJF', 'SBNY', 'SCHW', 'SIVB', 'SPGI', 'STT', 'TROW', 
+    'TRV', 'UNM', 'USB', 'WFC', 'WRB', 'ZION'
+],
+    'Health Care': [
+    'ABT', 'ABBV', 'ABMD', 'A', 'ALXN', 'ALGN', 'ABC', 'AMGN', 'ANTM', 'BAX', 'BDX', 'BIIB', 'BSX', 'BMY', 'CAH',
+    'CNC', 'CERN', 'CI', 'COO', 'CVS', 'DHR', 'DVA', 'XRAY', 'EW', 'GILD', 'HCA', 'HSIC', 'HOLX', 'HUM', 'IDXX',
+    'ILMN', 'INCY', 'ISRG', 'IQV', 'JNJ', 'LH', 'LLY', 'MCK', 'MDT', 'MRK', 'MTD', 'MYL', 'PDCO', 'PKI', 'PRGO',
+    'PFE', 'DGX', 'REGN', 'RMD', 'SYK', 'MOH', 'TMO', 'UNH', 'UHS', 'VAR', 'VRTX', 'WAT', 'WCG', 'ZBH', 'ZTS'
+],
+    'Industrials': [
+    'MMM', 'ALK', 'ALLE', 'AAL', 'AME', 'AOS', 'ARNC', 'BA', 'CHRW', 'CAT', 'CTAS', 'CPRT', 'CSX', 'CMI', 
+    'DE', 'DAL', 'DOV', 'ETN', 'EMR', 'EFX', 'EXPD', 'FAST', 'FDX', 'FLS', 'FLR', 'FTV', 'FBHS', 'GD', 
+    'GE', 'GWW', 'HON', 'HII', 'IEX', 'INFO', 'ITW', 'IR', 'JCI', 'J', 'KSU', 'LMT', 'MAS', 'NLSN', 
+    'NSC', 'NOC', 'ODFL', 'PCAR', 'PH', 'PNR', 'PWR', 'RTX', 'RSG', 'RHI', 'ROK', 'ROL', 'ROP', 'SNA', 
+    'LUV', 'SWK', 'TXT', 'TDG', 'TT', 'TDY', 'UNP', 'UAL', 'UPS', 'URI', 'VRSK', 'WAB', 'WM', 'XYL'
+],
+    'Information Technology': [
+    'AAPL', 'ACN', 'ADBE', 'ADI', 'ADP', 'ADS', 'AKAM', 'AMD', 'ANET', 'ANSS', 'APH', 'APTV', 'AVGO', 'BR', 
+    'CDNS', 'CDW', 'CERN', 'CRM', 'CSCO', 'CTXS', 'DXC', 'ENPH', 'EPAM', 'FIS', 'FISV', 'FLT', 'FTNT', 'GLW', 
+    'GOOGL', 'GOOG', 'HPE', 'HPQ', 'IBM', 'INTC', 'INTU', 'IPGP', 'IT', 'JKHY', 'JNPR', 'KEYS', 'KLAC', 'LRCX', 
+    'MA', 'MCHP', 'MSFT', 'MSI', 'NTAP', 'NLOK', 'NVDA', 'ORCL', 'PAYC', 'PAYX', 'PYPL', 'QCOM', 'QRVO', 'RHT', 
+    'CRM', 'STX', 'SWKS', 'SNPS', 'TEL', 'TXN', 'TYL', 'V', 'VRSN', 'WDC', 'WU', 'XLNX', 'XRX', 'ZBRA'
+],
+    'Materials': [
+    'APD', 'ALB', 'AMCR', 'AVY', 'BALL', 'BLL', 'CF', 'CTVA', 'DOW', 'DD', 'EMN', 'ECL', 'FMC', 'FCX', 'IP', 
+    'IFF', 'LIN', 'LYB', 'MLM', 'NEM', 'NUE', 'PKG', 'PPG', 'SEE', 'SHW', 'VMC', 'WRK', 'WLK', 'WY'
+],
+    'Real Estate': [
+    'AMT', 'ARE', 'AVB', 'BXP', 'CBRE', 'CCI', 'DLR', 'DRE', 'EQIX', 'EQR', 'ESS', 'EXR', 'FRT', 'HST', 
+    'IRM', 'KIM', 'MAA', 'PLD', 'PSA', 'O', 'REG', 'SBAC', 'SPG', 'SLG', 'UDR', 'VTR', 'VNO', 'WELL', 'WY'
+],
+    'Utilities': [
+    'AES', 'AEE', 'AEP', 'AWK', 'ATO', 'CNP', 'CMS', 'ED', 'D', 'DTE', 'DUK', 'EIX', 'ETR', 'EVRG', 'ES', 
+    'EXC', 'FE', 'LNT', 'NEE', 'NI', 'NRG', 'PNW', 'PPL', 'PEG', 'SRE', 'SO', 'WEC', 'XEL'
+]
 }
 
 # Function to fetch data for a specific stock with one year of data

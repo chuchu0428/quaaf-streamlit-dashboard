@@ -1,6 +1,8 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Sector to stocks mapping for a subset of S&P 500
 sector_to_stocks = {
@@ -113,11 +115,11 @@ def fetch_strategy_data(ticker):
     """ Fetch historical data for trading strategy simulation. """
     data = yf.Ticker(ticker)
     hist = data.history(period="1y")
-    return hist['Close']
+    return hist
 
 def calculate_momentum(data):
     """ Calculate simple momentum as the percentage change over the specified period """
-    return data.pct_change(periods=90)  # Using 90 days as momentum period
+    return data['Close'].pct_change(periods=90)  # Using 90 days as momentum period
 
 def display_strategy(strategy, data):
     """ Display insights based on selected trading strategy """
@@ -125,6 +127,55 @@ def display_strategy(strategy, data):
         momentum = calculate_momentum(data)
         st.write("Momentum calculated over 90 days:")
         st.line_chart(momentum)
+
+def calculate_support_resistance(data):
+    """ Calculate simple support and resistance levels based on 90-day high and low """
+    resistance = data['High'].rolling(window=90).max()
+    support = data['Low'].rolling(window=90).min()
+    return support, resistance
+
+def dual_moving_average(data, short_window=40, long_window=100):
+    """ Calculate Dual Moving Average Crossover """
+    data['Short_Moving_Avg'] = data['Close'].rolling(window=short_window).mean()
+    data['Long_Moving_Avg'] = data['Close'].rolling(window=long_window).mean()
+    data['Crossover_Long'] = np.where(data['Short_Moving_Avg'] > data['Long_Moving_Avg'], 1, 0)
+    data['Crossover_Short'] = np.where(data['Short_Moving_Avg'] < data['Long_Moving_Avg'], -1, 0)
+    return data[['Crossover_Long', 'Crossover_Short']]
+
+def absolute_oscillator(data, fast_period=12, slow_period=26):
+    """ Calculate Absolute Oscillator which is essentially MACD """
+    fast_ma = data['Close'].ewm(span=fast_period, adjust=False).mean()
+    slow_ma = data['Close'].ewm(span=slow_period, adjust=False).mean()
+    data['AO'] = fast_ma - slow_ma
+    return data['AO']
+
+def display_strategy(strategy, data):
+    if strategy == "Momentum":
+        momentum = calculate_momentum(data)
+        st.write("Momentum calculated over 90 days:")
+        st.line_chart(momentum)
+    elif strategy == "Support and Resistance":
+        support, resistance = calculate_support_resistance(data)
+        st.write("Support and Resistance Levels:")
+        
+        # Plotting Support, Resistance, and Close Price on the same chart
+        plt.figure(figsize=(10, 5))
+        plt.plot(data['Close'], label='Close Price', color='blue')
+        plt.plot(support, label='Support', color='green')
+        plt.plot(resistance, label='Resistance', color='red')
+        plt.title('Support and Resistance Levels')
+        plt.xlabel('Date')
+        plt.ylabel('Price')
+        plt.legend()
+        st.pyplot(plt)
+    elif strategy == "Dual Moving Average Crossover":
+        crossover_data = dual_moving_average(data)
+        st.write("Dual Moving Average Crossover Signals:")
+        st.line_chart(crossover_data)
+    elif strategy == "Absolute Oscillator":
+        ao = absolute_oscillator(data)
+        st.write("Absolute Oscillator:")
+        st.line_chart(ao)
 # Streamlit UI for Stocks with Sector Selection
 
 def display_stock_dashboard():
@@ -142,10 +193,10 @@ def display_stock_dashboard():
 
     # Additional section for selecting and displaying trading strategies
     st.sidebar.subheader("Trading Strategies")
-    selected_strategy = st.sidebar.selectbox('Select a Strategy', ['Momentum'])  # Add more strategies here
+    selected_strategy = st.sidebar.selectbox('Select a Strategy', ['Momentum', 'Support and Resistance', 'Dual Moving Average Crossover', 'Absolute Oscillator'])  # Add more strategies here
     strategy_data = fetch_strategy_data(selected_stock)  # Fetch data suitable for strategy analysis
     display_strategy(selected_strategy, strategy_data)
-    
+
 def display_index_dashboard():
     st.title('Industry Indices Dashboard')
     indices = ['^DJI', '^GSPC', '^IXIC', '^RUT']  # Dow Jones, S&P 500, NASDAQ, Russell 2000

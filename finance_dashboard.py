@@ -149,6 +149,48 @@ def absolute_oscillator(data, fast_period=12, slow_period=26):
     data['AO'] = fast_ma - slow_ma
     return data['AO']
 
+def calculate_strategy_returns(data, strategy):
+    """Calculate returns for a given strategy based on $1000 investment a year ago"""
+    initial_investment = 1000
+    shares = initial_investment / data['Close'].iloc[0]
+    
+    if strategy == "Momentum":
+        momentum = calculate_momentum(data)
+        buy_signal = momentum > 0
+        sell_signal = momentum <= 0
+    elif strategy == "Support and Resistance":
+        support, resistance = calculate_support_resistance(data)
+        buy_signal = data['Close'] <= support
+        sell_signal = data['Close'] >= resistance
+    elif strategy == "Dual Moving Average Crossover":
+        crossover_data = dual_moving_average(data)
+        buy_signal = crossover_data['Crossover_Long'] == 1
+        sell_signal = crossover_data['Crossover_Short'] == -1
+    elif strategy == "Absolute Oscillator":
+        ao = absolute_oscillator(data)
+        buy_signal = ao > 0
+        sell_signal = ao <= 0
+    else:
+        return None
+
+    position = 0
+    returns = []
+
+    for i in range(len(data)):
+        if buy_signal.iloc[i] and position == 0:
+            position = 1
+        elif sell_signal.iloc[i] and position == 1:
+            position = 0
+
+        daily_return = data['Close'].iloc[i] / data['Close'].iloc[i-1] if i > 0 else 1
+        returns.append(daily_return if position == 1 else 1)
+
+    cumulative_returns = pd.Series(returns).cumprod()
+    final_value = initial_investment * cumulative_returns.iloc[-1]
+    total_return = (final_value - initial_investment) / initial_investment * 100
+
+    return final_value, total_return
+
 def display_strategy(strategy, data):
     if strategy == "Momentum":
         momentum = calculate_momentum(data)
@@ -158,7 +200,6 @@ def display_strategy(strategy, data):
         support, resistance = calculate_support_resistance(data)
         st.write("Support and Resistance Levels:")
         
-        # Plotting Support, Resistance, and Close Price on the same chart
         plt.figure(figsize=(10, 5))
         plt.plot(data['Close'], label='Close Price', color='blue')
         plt.plot(support, label='Support', color='green')
@@ -176,6 +217,13 @@ def display_strategy(strategy, data):
         ao = absolute_oscillator(data)
         st.write("Absolute Oscillator:")
         st.line_chart(ao)
+    
+    # Calculate and display strategy returns
+    final_value, total_return = calculate_strategy_returns(data, strategy)
+    st.write(f"\nStrategy Performance:")
+    st.write(f"If you had invested $1000 a year ago using this strategy:")
+    st.write(f"Final investment value: ${final_value:.2f}")
+    st.write(f"Total return: {total_return:.2f}%")
 # Streamlit UI for Stocks with Sector Selection
 
 def display_stock_dashboard():
@@ -191,10 +239,10 @@ def display_stock_dashboard():
         st.metric(label=label, value=value)
     st.line_chart(stock_data[['Close', 'SMA_20', 'EMA_20']])
 
-    # Additional section for selecting and displaying trading strategies
+    # Strategy analysis
     st.sidebar.subheader("Trading Strategies")
-    selected_strategy = st.sidebar.selectbox('Select a Strategy', ['Momentum', 'Support and Resistance', 'Dual Moving Average Crossover', 'Absolute Oscillator'])  # Add more strategies here
-    strategy_data = fetch_strategy_data(selected_stock)  # Fetch data suitable for strategy analysis
+    selected_strategy = st.sidebar.selectbox('Select a Strategy', ['Momentum', 'Support and Resistance', 'Dual Moving Average Crossover', 'Absolute Oscillator'])
+    strategy_data = fetch_strategy_data(selected_stock)
     display_strategy(selected_strategy, strategy_data)
 
 def display_index_dashboard():
@@ -215,6 +263,5 @@ def main():
         display_index_dashboard()
     elif dashboard_type == 'Stocks':
         display_stock_dashboard()
-
-if __name__ == "__main__":
+if __name__ == "__main__": 
     main()
